@@ -6,81 +6,70 @@ const hint = document.querySelector("#question");
 const startGameButton = document.getElementById("start-game");
 const choiceBox = document.querySelector("#choice-box");
 const form = document.querySelector("form");
-const formInitials = document.getElementById("name");
+const Initials = document.getElementById("name");
 const feedback = document.querySelector("#feedback");
-const playAgainButton = document.getElementById("play-again");
+const playAgain = document.getElementById("play-again");
 const localScores = document.getElementById("local-scores");
 
 let userChoice;
-let questNumber = -1;
+let questionNum = -1;
 let time = 120000;
 let score;
 let tryAgainStatus = false;
-if (JSON.parse(localStorage.getItem("highScore")) == null) {
-    var scoreArray = [];
-} else
-    var scoreArray = [].concat(JSON.parse(localStorage.getItem("highScore")));
-const quizQuestions = [
+
+const Questions = [
     {
         question:
-            "This is a named reference to any value in javascript; It is a container for data",
-        options: ["a: variable", "b: querySelector()", "c: function"],
-        answer: "a: variable",
+            "Which built in method returns the length of a string?",
+        options: ["a: length()", "b: size()", "c: index()"],
+        answer: "a: length()",
     },
     {
         question:
-            "A ________ is a set of statements which performs a task or calculates a value",
-        options: ["a: keydown", "b: iteration", "c: function"],
-        answer: "c: function",
+            "Which of the following functions of array objects sorts the elements of an array?",
+        options: ["a: unshift()", "b: toSource()", "c: sort()"],
+        answer: "c: sort()",
     },
     {
         question:
-            "This method returns the first element within the HTML document which matches the specified selector",
-        options: ["a: slice()", "b: querySelector()", "c: concat()"],
-        answer: "b: querySelector()",
+            "Function and var are known as:",
+        options: ["a: Keywords", "b: Declaration statements", "c: Data types"],
+        answer: "b: Declaration statements",
     },
     {
         question:
-            "____ is a concept which helps us manage the visibilty of variables in a javascript file",
-        options: ["a: scope", "b: global", "c: constant"],
-        answer: "a: scope",
+            "Which of the following is not a Javascript data type?",
+        options: ["a: Float", "b: Number", "c: Boolean"],
+        answer: "a: Float",
     },
     {
         question:
-            "A data representation of the objects which make up the content of an HTML document",
-        options: [
-            "a: Document Object Model (DOM)",
-            "b: local storage",
-            "c: function",
-        ],
-        answer: "a: Document Object Model (DOM)",
+            "Inside which HTML element do we put Javascript?",
+        options: [ "a: <script>", "b: <head>", "c: <style>"],
+        answer: "a: <script>",
     },
     {
         question:
-            "This class is used to store keyed data and complex entities in javascript",
+            "What class is used to store keyed data and complex entities in javascript",
         options: ["a: constant", "b: variable", "c: object"],
         answer: "c: object",
     },
 ];
 
-shuffleArray(quizQuestions);
-startGameButton.addEventListener("click", startGame);
-viewScore.addEventListener("click", scoreRender);
-choiceBox.addEventListener("click", questionValidation);
-form.addEventListener("submit", scoreSubmit);
+shuffleArray(Questions);
+
+if (JSON.parse(localStorage.getItem("highScore")) == null) {
+    var scoreArray = [];
+} else
+    var scoreArray = [].concat(JSON.parse(localStorage.getItem("highScore")));
+    
+
 function hide(target) {
     target.className = "hidden";
 }
 
 function show(target) {
     target.className = "visible";
-}
-
-function startGame() {
-    hide(title);
-    hide(startGameButton);
-    gameTimer();
-    nextQuestion();
 }
 
 function gameTimer() {
@@ -93,7 +82,7 @@ function gameTimer() {
         }
         if (time <= 0) {
             let tryAgain = confirm(
-                "Sorry, you ran out of time! Do you want to play again?"
+                "Looks like you ran out of time, would you like to try again?"
             );
             if (tryAgain == true) {
                 location.reload();
@@ -104,6 +93,14 @@ function gameTimer() {
         }
     }, 1000);
 }
+
+function startGame() {
+    hide(title);
+    hide(startGameButton);
+    gameTimer();
+    nextQuestion();
+}
+startGameButton.addEventListener("click", startGame);
 
 function feedbackFade() {
     setInterval(function () {
@@ -116,33 +113,33 @@ function nextQuestion() {
         choiceBox.innerHTML = "";
     }
 
-    if (questNumber + 1 === quizQuestions.length) {
+    if (questionNum + 1 === Questions.length) {
         score = time / 1000;
         choiceBox.innerHTML = "";
         show(title);
         title.textContent = "All Done!";
         hint.textContent =
-            "You have finished taking the quiz and have a score of " + score;
+            "You've finished the quiz, you're score is  " + score;
         show(form);
         tryAgainStatus = true;
     }
-    questNumber++;
+    questionNum++;
     show(feedback);
-    if (questNumber <= quizQuestions.length - 1) {
-        for (let i = 0; i < quizQuestions[questNumber].options.length; i++) {
-            hint.textContent = quizQuestions[questNumber].question;
-            let userChoices = document.createElement("button");
-            choiceBox.appendChild(userChoices);
-            userChoices.setAttribute("id", "choice");
-            userChoices.textContent = quizQuestions[questNumber].options[i];
-            userChoices.addEventListener("click", nextQuestion);
+    if (questionNum <= Questions.length - 1) {
+        for (let i = 0; i < Questions[questionNum].options.length; i++) {
+            hint.textContent = Questions[questionNum].question;
+            let userOptions = document.createElement("button");
+            choiceBox.appendChild(userOptions);
+            userOptions.setAttribute("id", "choice");
+            userOptions.textContent = Questions[questionNum].options[i];
+            userOptions.addEventListener("click", nextQuestion);
         }
     }
 }
 
 function questionValidation(event) {
     let userClick = event.target;
-    if (userClick.textContent == quizQuestions[questNumber - 1].answer) {
+    if (userClick.textContent == Questions[questionNum - 1].answer) {
         feedback.textContent = "Correct!";
         feedbackFade();
         return;
@@ -152,33 +149,31 @@ function questionValidation(event) {
         feedbackFade();
     }
 }
+choiceBox.addEventListener("click", questionValidation);
 
 function scoreSubmit(event) {
     event.preventDefault();
     let savedScore = {
-        initial: formInitials.value,
+        initial: Initials.value,
         highScore: score,
     };
     scoreArray.push(savedScore);
     localStorage.setItem("highScore", JSON.stringify(scoreArray));
-    formInitials.value = "";
+    Initials.value = "";
     scoreRender();
 }
+form.addEventListener("submit", scoreSubmit);
+
 
 function scoreRender() {
     title.textContent = "High Scores";
     clearInterval(gameTimer);
     let playAgain = document.createElement("button");
-    if (playAgainButton.childElementCount < 1) {
-        playAgainButton.appendChild(playAgain);
+    if (playAgain.childElementCount < 1) {
+        playAgain.appendChild(playAgain);
         playAgain.textContent = "Play Again";
     }
-    hide(hint);
-    hide(form);
-    hide(startGameButton);
-    hide(choiceBox);
-    show(localScores);
-    show(title)
+
     if (localScores.childElementCount <= 0) {
         for (i = 0; i < scoreArray.length; i++) {
             let userScore = document.createElement("li");
@@ -193,6 +188,7 @@ function scoreRender() {
         location.reload();
     });
 }
+viewScore.addEventListener("click", scoreRender);
 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
